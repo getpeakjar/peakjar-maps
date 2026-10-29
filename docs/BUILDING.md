@@ -416,7 +416,7 @@ Copernicus credit to the terrain source):
 The contour tiles store their credit inside the tile set, so a change to it
 needs `build-contours.sh` to run again.
 
-**In the app's licences screen or legal notice:**
+**In the app's licences screen** (Settings → About in the PeakJar app):
 
 - Map and peak data from OpenStreetMap, available under the
   [Open Database Licence](https://opendatacommons.org/licenses/odbl/). The
