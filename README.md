@@ -7,7 +7,8 @@ for hillshade. The rest of the world is drawn as country silhouettes. The
 repository also holds the map style and the server setup.
 
 This repository holds the recipe only. Downloaded data (`data/`), scratch
-space (`work/`) and built tiles (`build/`) are never committed.
+space (`work/`), built tiles (`build/`) and build logs (`logs/`) are never
+committed.
 
 ## Quick start
 
@@ -38,6 +39,32 @@ how to check the result, and how to add a country, and
 | `style/` | The PeakJar Outdoor style (a fork of OSM Liberty) and its icon sprites |
 | `serve/` | Martin and Caddy configuration for local serving and the VPS (Docker Compose), and the test page |
 | `docs/` | The build and deployment guides |
+
+## Rules for contributors
+
+- **Containers:** Planetiler, Martin and Caddy run only in the locked-down
+  containers the scripts set up: no home folder, dropped capabilities, a
+  read-only root filesystem, and Planetiler without network while building.
+  Images are pinned by digest in `scripts/config.sh` and `serve/compose.yaml`;
+  update a digest deliberately and never use a bare tag.
+- **Where to build:** builds need about 50 GB of disk and 6–8 GB of free RAM.
+  The server only serves; never build there.
+- **Scratch space:** Planetiler empties `work/` when it starts, so keep
+  anything you want to keep, such as logs, elsewhere.
+- **Coverage:** the `COUNTRIES` list in `scripts/config.sh`. Every output
+  covers the whole area (the world layer cuts it out), so a coverage change
+  means rerunning every step.
+- **Style:** edit `style/outdoor.json` directly (it is a fork of OSM Liberty),
+  validate it against the MapLibre style specification as shown in the build
+  guide, and run `scripts/build-static.sh` afterwards. Keep the `world_*`
+  layers above the detailed layers and below the labels: the world mask hides
+  everything outside the coverage area.
+- **Terrain:** the Terrarium encoding breaks under lossy formats or averaging;
+  terrain tiles stay lossless PNG with nearest-neighbour overviews.
+- **Credits:** keep credit texts exact. The Copernicus credit must use the
+  "produced using Copernicus WorldDEM-30 …" wording for modified data; the
+  full list of credits and legal notices is in the build guide's
+  [Attribution](docs/BUILDING.md#attribution) section.
 
 ## Attribution
 
