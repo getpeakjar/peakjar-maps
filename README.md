@@ -4,7 +4,8 @@ Self-hosted outdoor map for PeakJar. Detailed vector tiles cover Poland,
 Czechia, Slovakia, Austria, Switzerland, Liechtenstein, Slovenia, Hungary and
 Romania: a base map, hiking trails coloured by trail mark, contours and terrain
 for hillshade. The rest of the world is drawn as country silhouettes. The
-repository also holds the map style and the server setup.
+repository also holds the map style, the server setup, and the app's peak
+catalogue and mountain regions, built from the same OpenStreetMap data.
 
 This repository holds the recipe only. Downloaded data (`data/`), scratch
 space (`work/`), built tiles (`build/`) and build logs (`logs/`) are never
@@ -23,8 +24,8 @@ scripts/deploy.sh deploy@your-vps https://maps.peakjar.com
 and `build-all.sh --refresh` reruns only what an OpenStreetMap refresh
 changes. The steps can also be run one by one: `download.sh`,
 `download-dem.sh`, then `build-basemap.sh`, `build-world.sh`,
-`build-trails.sh`, `build-contours.sh`, `build-terrain.sh` and
-`build-static.sh`.
+`build-trails.sh`, `build-peaks.sh`, `build-contours.sh`, `build-terrain.sh`
+and `build-static.sh`.
 
 A full build takes about 1 h 35 min and produces about 8 GB. See
 [docs/BUILDING.md](docs/BUILDING.md) for requirements, what each step does,
@@ -36,6 +37,7 @@ how to check the result, and how to add a country, and
 | Path | Contents |
 | --- | --- |
 | `scripts/` | Download, build and serve scripts; settings in `scripts/config.sh` |
+| `build/data/` | (built) The app's peaks and regions, published as GitHub releases |
 | `style/` | The PeakJar Outdoor style (a fork of OSM Liberty) and its icon sprites |
 | `serve/` | Martin and Caddy configuration for local serving and the VPS (Docker Compose), and the test page |
 | `docs/` | The build and deployment guides |

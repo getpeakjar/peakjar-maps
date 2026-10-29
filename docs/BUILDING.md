@@ -33,6 +33,7 @@ build/ ──► Martin (tiles) + Caddy (static files)  ──►  MapLibre in t
 | `build/contours.pmtiles` | 2.5 GB | 40 min | 10–14 | Contours every 10 m, layer `contours` |
 | `build/terrain.mbtiles` | 1.1 GB | 31 min | 5–11 | 512 px Terrarium PNG for hillshade and 3D terrain |
 | `build/trails.pmtiles` | 172 MB | 3 min | 8–14 | Hiking routes with trail colour, layer `trails` |
+| `build/data/` | 21 MB | 1.5 min | — | The app's peak catalogue (`peaks.json`) and mountain regions (`regions.json`) |
 | `build/static/` | 4.4 MB | seconds | — | Style, fonts, icon sprites, test page |
 
 About 7.9 GB in all, and about 1 h 35 min for a full build including downloads.
@@ -87,8 +88,8 @@ scripts/download.sh
   `data/coverage.poly` (for Planetiler) and `data/coverage.geojson` (for GDAL).
   Every later step clips to it, which keeps neighbouring countries out.
 - Merges the extracts into `data/coverage.osm.pbf` (5.5 GB).
-- Writes the OSM snapshot time to `data/snapshot.txt`. Build `peakjar-data`
-  from the same snapshot so the app's peaks and the map agree.
+- Writes the OSM snapshot time to `data/snapshot.txt`. The peaks step copies
+  it next to the app's data, so peaks and map can be matched to one snapshot.
 
 Takes a few minutes, depending on your connection. Rerunning only downloads
 files Geofabrik has updated since (it publishes new extracts daily).
@@ -116,6 +117,7 @@ Each script can be run on its own once its inputs exist.
 scripts/build-basemap.sh    # ~20 min
 scripts/build-world.sh      # under a minute
 scripts/build-trails.sh     # ~3 min
+scripts/build-peaks.sh      # ~1.5 min
 scripts/build-contours.sh   # ~40 min
 scripts/build-terrain.sh    # ~30 min
 ```
@@ -161,6 +163,28 @@ direction for all its routes, because MapLibre offsets lines relative to their
 direction; offsetting whole routes made them jump sides wherever a way was
 drawn the other way. An unmarked route is dropped where a marked one uses the
 same way. The step prints how many lines each colour got.
+
+**Peaks and regions** (`build-peaks.sh`). The app's own data, from the same
+OSM file as the tiles so peaks and map agree. `scripts/peaks_regions.py`
+writes `build/data/`:
+
+- `peaks.json`: every `natural=peak`/`volcano` node (about 100,000), with
+  `id` (`node/123`), `name` (the Polish name when OSM has one, else the local
+  name; missing for unnamed peaks, which the app labels by elevation),
+  `name_local`, `ele`, `ele_approx`, `wikipedia` and `country` (ISO code).
+  Peaks without an OSM height get one sampled from the Copernicus tiles,
+  marked `ele_approx` (it can be up to about 20 m high in forest).
+- `regions.json`: geomorphological units and mountain ranges in Poland and
+  Slovakia (`boundary=geomorphological-unit`, `natural=mountain_range`), with
+  `name`, `name_local`, `region_type`, `boundary`, `natural`, `wikidata`,
+  `wikipedia` and `country`, outlines simplified to about 30 m. Other
+  countries have too few of these in OSM to be useful.
+- `snapshot.txt`: the OSM snapshot both come from.
+
+GDAL's default OSM configuration drops the `ele` tag, so the script reads
+the data with a copy that keeps it. The step prints peak counts per country.
+The app downloads these files from a GitHub release of this repository
+(see its `client/HELP.md`).
 
 **Contours** (`build-contours.sh`). `gdal_contour` traces 10 m contours per
 elevation tile in parallel. Each line gets `ele` and `level` (100, 50 or 10).
@@ -322,6 +346,7 @@ Coverage is a single list. To add, for example, Austria:
    scripts/build-basemap.sh
    scripts/build-world.sh
    scripts/build-trails.sh
+   scripts/build-peaks.sh
    scripts/build-contours.sh
    scripts/build-terrain.sh
    scripts/build-static.sh
@@ -344,9 +369,10 @@ Coverage is a single list. To add, for example, Austria:
      A country west of Greenwich (for example Spain or the UK) needs the
      tile naming extended to `W` longitudes.
 
-5. Add the country's peaks to `peakjar-data`, built from the same OSM snapshot
-   (`data/snapshot.txt`). The tiles do not add peaks to the app by
-   themselves.
+5. Check the peak counts the peaks step prints, and add the country's ISO code
+   to `COUNTRY_CODES` in `scripts/peaks_regions.py` (peaks in a country it
+   does not know are dropped). Regions are only built for Poland and
+   Slovakia (`REGION_COUNTRIES`).
 
 Removing a country works the same way: delete it from the list and rebuild.
 
@@ -392,8 +418,10 @@ needs `build-contours.sh` to run again.
 
 **In the app's licences screen or legal notice:**
 
-- Map data from OpenStreetMap, available under the
+- Map and peak data from OpenStreetMap, available under the
   [Open Database Licence](https://opendatacommons.org/licenses/odbl/). The
+  peak catalogue counts too: approximate peak heights come from Copernicus, so
+  its credit belongs with the peak data as well. The
   ODbL requires offering the map data, or how it was made, to anyone who gets
   it from the app (offline packs count). Keep this repository public, or state
   that the data is available on request. Do not encrypt offline packs without
