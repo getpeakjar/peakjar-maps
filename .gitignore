@@ -3,3 +3,6 @@ data/
 work/
 build/
 logs/
+
+# Local agent notes for this machine
+CLAUDE.md
