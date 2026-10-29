@@ -77,3 +77,21 @@ COPERNICUS by the European Union and ESA; all rights reserved". See
 [docs/BUILDING.md](docs/BUILDING.md#attribution) for the full list of credits
 and legal notices. The style is derived from OSM Liberty; see
 [style/LICENSE-osm-liberty.md](style/LICENSE-osm-liberty.md).
+
+## Licence
+
+The scripts, server configuration and documentation are under the
+[BSD 3-Clause License](LICENSE). The style is derived from OSM Liberty, which
+keeps its own BSD licence; see
+[style/LICENSE-osm-liberty.md](style/LICENSE-osm-liberty.md).
+
+What the build produces is not covered by that licence:
+
+- The vector tiles (base map, trails, world layer) and the peak and region data
+  are derived from OpenStreetMap and are available under the
+  [Open Database License (ODbL)](https://opendatacommons.org/licenses/odbl/),
+  © OpenStreetMap contributors. The world layer also uses Natural Earth
+  (public domain).
+- The contour and terrain tiles, and the approximate peak heights, are produced
+  from Copernicus WorldDEM-30 and are subject to its licence terms and credit
+  (see [Attribution](#attribution)).
