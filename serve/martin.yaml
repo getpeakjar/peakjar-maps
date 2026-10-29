@@ -1,0 +1,14 @@
+# Martin serves every tile set as /tiles/<source>/{z}/{x}/{y} and its TileJSON
+# at /tiles/<source>. Paths are inside the container; build/ is mounted at /tiles.
+listen_addresses: 0.0.0.0:3000
+route_prefix: /tiles
+cache_size_mb: 256
+pmtiles:
+  sources:
+    world: /tiles/world.pmtiles
+    basemap: /tiles/basemap.pmtiles
+    trails: /tiles/trails.pmtiles
+    contours: /tiles/contours.pmtiles
+mbtiles:
+  sources:
+    terrain: /tiles/terrain.mbtiles

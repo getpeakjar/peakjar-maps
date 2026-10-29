@@ -1,0 +1,27 @@
+# Caddy in front of Martin: tiles go to Martin, everything else (style, fonts,
+# sprites, test page) is served from build/static. SITE_ADDRESS is ":8080"
+# locally and behind another reverse proxy, or the maps domain when Caddy
+# faces the internet and handles HTTPS itself. MARTIN_UPSTREAM is
+# "localhost:3000" in the local pod and "martin:3000" under Docker Compose.
+{$SITE_ADDRESS::8080} {
+	# Martin sets this on tiles itself; "?" only adds it where it is missing,
+	# because browsers reject a doubled header
+	header ?Access-Control-Allow-Origin *
+
+	# Tiles and fonts change only with a new release; a CDN or the app's
+	# cache can keep them for a day. The style is re-checked more often so
+	# a release reaches clients quickly.
+	header /tiles/* Cache-Control "public, max-age=86400"
+	header /fonts/* Cache-Control "public, max-age=604800"
+	header /sprites/* Cache-Control "public, max-age=86400"
+	header /style/* Cache-Control "public, max-age=300"
+
+	handle /tiles/* {
+		reverse_proxy {$MARTIN_UPSTREAM:localhost:3000}
+	}
+
+	handle {
+		root * /srv
+		file_server
+	}
+}

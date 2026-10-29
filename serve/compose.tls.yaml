@@ -1,0 +1,15 @@
+# Lets Caddy face the internet on ports 80/443 and obtain the HTTPS
+# certificate itself. Use only when no other reverse proxy owns those ports:
+#   SITE_ADDRESS=maps.peakjar.com docker compose -f compose.yaml -f compose.tls.yaml up -d
+services:
+  caddy:
+    ports: !override
+      - 80:80
+      - 443:443
+      - 443:443/udp
+    tmpfs: !override [/config]
+    volumes:
+      - caddy-data:/data
+
+volumes:
+  caddy-data:
