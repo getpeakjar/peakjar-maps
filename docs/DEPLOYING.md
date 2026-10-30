@@ -88,7 +88,7 @@ rate-limiting rule there if the proxy cannot do it (option B).
 
 ## Deploying a release
 
-From the build machine, after building every tile set:
+From the build machine, on an up-to-date `main`, after building every tile set:
 
 ```bash
 scripts/deploy.sh deploy@your-vps https://maps.peakjar.com
