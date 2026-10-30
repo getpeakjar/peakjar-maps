@@ -42,6 +42,30 @@ how to check the result, and how to add a country, and
 | `serve/` | Martin and Caddy configuration for local serving and the VPS (Docker Compose), and the test page |
 | `docs/` | The build and deployment guides |
 
+## Git workflow
+
+This repository uses `main` and short-lived branches, without a `develop`
+branch or the GitFlow of the app repository. Merging releases nothing: the map
+only changes when a build is deployed, and the app's data only when a release
+is published.
+
+- **Branches:** branch from `main` as `feature/`, `bugfix/`, `docs/` or
+  `chore/`, with the task ID if there is one, for example
+  `feature/PJ-123-add-germany`.
+- **Pull requests:** every change goes through a pull request; never push to
+  `main` directly. Write the title and description in English, with the task ID
+  in the title and the task link in the description if there is one.
+- **Merging:** always squash and merge, with the pull request title as the
+  commit subject. Update a branch by rebasing it onto `main`, not by merging
+  `main` into it.
+- **Commit subjects:** capitalized, imperative, no trailing period, for example
+  `Add Germany to the coverage`.
+- **Deploying:** run `scripts/deploy.sh` from an up-to-date `main`, because it
+  uploads from the local clone.
+- **Data releases:** publish from `main` as `peaks-regions-osm-YYYY-MM-DD`; see
+  [step 9 of the build guide](docs/BUILDING.md#9-publish-the-app-data). This
+  repository has no version numbers or release branches.
+
 ## Rules for contributors
 
 - **Containers:** Planetiler, Martin and Caddy run only in the locked-down
