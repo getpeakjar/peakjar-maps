@@ -33,7 +33,7 @@ build/ ──► Martin (tiles) + Caddy (static files)  ──►  MapLibre in t
 | `build/contours.pmtiles` | 2.5 GB | 40 min | 10–14 | Contours every 10 m, layer `contours` |
 | `build/terrain.mbtiles` | 1.1 GB | 31 min | 5–11 | 512 px Terrarium PNG for hillshade and 3D terrain |
 | `build/trails.pmtiles` | 172 MB | 3 min | 8–14 | Hiking routes with trail colour, layer `trails` |
-| `build/data/` | 21 MB | 1.5 min | — | The app's peak catalogue (`peaks.json`) and mountain regions (`regions.json`) |
+| `build/data/` | 21 MB | 1.5 min | — | The app's peak catalogue (`peaks.json`, 17 MB) and mountain regions (`regions.json`, 4 MB) |
 | `build/static/` | 4.4 MB | seconds | — | Style, fonts, icon sprites, test page |
 
 About 7.9 GB in all, and about 1 h 35 min for a full build including downloads.
@@ -183,8 +183,8 @@ writes `build/data/`:
 
 GDAL's default OSM configuration drops the `ele` tag, so the script reads
 the data with a copy that keeps it. The step prints peak counts per country.
-The app downloads these files from a GitHub release of this repository
-(see its `client/HELP.md`).
+The app downloads these files from a GitHub release of this repository; see
+[step 9](#9-publish-the-app-data).
 
 **Contours** (`build-contours.sh`). `gdal_contour` traces 10 m contours per
 elevation tile in parallel. Each line gets `ele` and `level` (100, 50 or 10).
@@ -323,6 +323,54 @@ emulator and a phone on the same Wi-Fi.
 Put the build on the VPS with `scripts/deploy.sh`; see
 [DEPLOYING.md](DEPLOYING.md).
 
+## 9. Publish the app data
+
+The app does not use `build/data/` directly: `pnpm data:sync` in the client
+downloads `peaks.json` and `regions.json` from a GitHub release of this
+repository. Publish a release whenever those files change.
+
+Releases are named `peaks-regions-osm-YYYY-MM-DD`, where the date is the OSM
+snapshot in `build/data/snapshot.txt`. Publish from `main` once the changes
+behind the data are merged, so the tag points at a commit on `main`.
+
+1. Write the release notes to a file, here `work/release-notes.md`, with the
+   counts the peaks step printed. The licence and credit text must stay:
+
+   ```markdown
+   Peak catalogue and mountain regions for the PeakJar app, built from the OpenStreetMap snapshot of YYYY-MM-DD (the same snapshot as the map tiles).
+
+   - `peaks.json`: N peaks in <countries> (N named), with OSM id, name, elevation and country.
+   - `regions.json`: N geomorphological units and mountain ranges in Poland (N) and Slovakia (N).
+   - `snapshot.txt`: the OpenStreetMap snapshot time.
+
+   Built with `scripts/build-peaks.sh`; see `docs/BUILDING.md`.
+
+   ## Licence and credits
+
+   Data © OpenStreetMap contributors, available under the Open Database License (ODbL): https://www.openstreetmap.org/copyright
+
+   Approximate peak heights (`ele_approx`) were produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30.
+   ```
+
+2. Create the release:
+
+   ```bash
+   snapshot=$(cut -c1-10 build/data/snapshot.txt)
+   gh release create "peaks-regions-osm-$snapshot" \
+     build/data/peaks.json build/data/regions.json build/data/snapshot.txt \
+     --target main \
+     --title "Peaks and regions, OSM snapshot $snapshot" \
+     --notes-file work/release-notes.md
+   ```
+
+3. In the app repository, set `VERSION` in
+   `client/scripts/download-geo-data.mjs` to the new release name and run
+   `pnpm data:sync` in `client/`. It downloads the files and rebuilds the
+   bundled peaks database.
+
+Leave published releases in place, because older checkouts of the app still
+download from them.
+
 ## Adding a country
 
 Coverage is a single list. To add, for example, Austria:
@@ -382,7 +430,8 @@ To pick up new OpenStreetMap edits, run `scripts/build-all.sh --refresh`, or
 rerun the steps from `download.sh` on. The
 elevation data does not change, so `download-dem.sh` does nothing on a refresh
 and the contour and terrain builds give the same result; they only need
-rerunning when coverage changes.
+rerunning when coverage changes. New peaks and regions reach the app through
+a new release ([step 9](#9-publish-the-app-data)).
 
 ## Troubleshooting
 
