@@ -1,6 +1,6 @@
 # peakjar-maps
 
-Self-hosted outdoor map for PeakJar. Detailed vector tiles cover Poland,
+Self-hosted outdoor map for Peakjar. Detailed vector tiles cover Poland,
 Czechia, Slovakia, Austria, Switzerland, Liechtenstein, Slovenia, Hungary and
 Romania: a base map, hiking trails coloured by trail mark, contours and terrain
 for hillshade. The rest of the world is drawn as country silhouettes. The
@@ -38,7 +38,7 @@ how to check the result, and how to add a country, and
 | --- | --- |
 | `scripts/` | Download, build and serve scripts; settings in `scripts/config.sh` |
 | `build/data/` | (built) The app's peaks and regions, published as GitHub releases |
-| `style/` | The PeakJar Outdoor style (a fork of OSM Liberty) and its icon sprites |
+| `style/` | The Peakjar Outdoor style (a fork of OSM Liberty) and its icon sprites |
 | `serve/` | Martin and Caddy configuration for local serving and the VPS (Docker Compose), and the test page |
 | `docs/` | The build and deployment guides |
 

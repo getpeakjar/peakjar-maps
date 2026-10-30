@@ -1,4 +1,4 @@
-# Deploying PeakJar maps
+# Deploying Peakjar maps
 
 This guide puts a finished build (see [BUILDING.md](BUILDING.md)) on the VPS
 and keeps it running. The VPS only serves: Martin for tiles and Caddy for the
@@ -136,4 +136,4 @@ cd serve && docker compose up -d --force-recreate
 Offline packs on phones keep working without the server. For online use, the
 app's planned fallback is a copy of the same tiles as PMTiles files on static
 object storage, read with HTTP range requests and needing no tile server.
-The PeakJar app repository's ADR-039 describes that plan.
+The Peakjar app repository's ADR-039 describes that plan.

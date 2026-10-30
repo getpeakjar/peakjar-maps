@@ -44,7 +44,7 @@ echo "Writing tiles"
 rm -f "$BUILD_DIR/terrain.mbtiles"
 gdal_translate -q -of MBTiles \
   -co TILE_FORMAT=PNG -co BLOCKSIZE=512 -co RESAMPLING=NEAREST \
-  -co NAME="PeakJar terrain" -co DESCRIPTION="Copernicus GLO-30, Terrarium encoding" \
+  -co NAME="Peakjar terrain" -co DESCRIPTION="Copernicus GLO-30, Terrarium encoding" \
   "$dir/rgb.tif" "$BUILD_DIR/terrain.mbtiles"
 gdaladdo -q -r nearest "$BUILD_DIR/terrain.mbtiles" 2 4 8 16 32 64
 
