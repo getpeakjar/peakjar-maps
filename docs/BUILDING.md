@@ -1,4 +1,4 @@
-# Building PeakJar tiles
+# Building Peakjar tiles
 
 This guide takes you from an empty checkout to a working outdoor map served on
 your own machine, and explains how to add more countries. Every step is a
@@ -293,7 +293,7 @@ filesystems.
 - Zoomed out to the globe: the whole world is drawn, with the covered
   countries in the lighter land colour.
 
-## 7. Test in the PeakJar app
+## 7. Test in the Peakjar app
 
 Phones and emulators cannot reach `localhost` on the build machine, and the
 style holds absolute URLs, so serve and build the style on the machine's LAN
@@ -336,7 +336,7 @@ behind the data are merged, so the tag points at a commit on `main`.
    counts the peaks step printed. The licence and credit text must stay:
 
    ```markdown
-   Peak catalogue and mountain regions for the PeakJar app, built from the OpenStreetMap snapshot of YYYY-MM-DD (the same snapshot as the map tiles).
+   Peak catalogue and mountain regions for the Peakjar app, built from the OpenStreetMap snapshot of YYYY-MM-DD (the same snapshot as the map tiles).
 
    - `peaks.json`: N peaks in <countries> (N named), with OSM id, name, elevation and country.
    - `regions.json`: N geomorphological units and mountain ranges in Poland (N) and Slovakia (N).
@@ -464,7 +464,7 @@ Copernicus credit to the terrain source):
 The contour tiles store their credit inside the tile set, so a change to it
 needs `build-contours.sh` to run again.
 
-**In the app's licences screen** (Settings → About in the PeakJar app):
+**In the app's licences screen** (Settings → About in the Peakjar app):
 
 - Map and peak data from OpenStreetMap, available under the
   [Open Database Licence](https://opendatacommons.org/licenses/odbl/). The

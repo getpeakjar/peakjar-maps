@@ -1,6 +1,6 @@
 {
   "version": 8,
-  "name": "PeakJar Outdoor",
+  "name": "Peakjar Outdoor",
   "metadata": {
     "peakjar:upstream": "maputnik/osm-liberty@40a0d19861c9d26805dee3daab5cb366badb6678"
   },
