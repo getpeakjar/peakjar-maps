@@ -314,9 +314,8 @@ cache, because `EXPO_PUBLIC_` variables are fixed when the bundle is built:
 EXPO_PUBLIC_MAP_STYLE_URL=http://192.168.1.13:8790/style/outdoor.json
 ```
 
-Then pick **PeakJar Outdoor** in Settings → Map provider. The option only
-appears when the variable is set. The same URL works for web, the Android
-emulator and a phone on the same Wi-Fi.
+The same URL works for web, the Android emulator and a phone on the same
+Wi-Fi.
 
 ## 8. Deploy
 
