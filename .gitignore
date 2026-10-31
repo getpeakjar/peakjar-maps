@@ -1,0 +1,8 @@
+# Downloaded inputs, scratch space and build outputs are large and never committed
+data/
+work/
+build/
+logs/
+
+# Local agent notes for this machine
+CLAUDE.md
