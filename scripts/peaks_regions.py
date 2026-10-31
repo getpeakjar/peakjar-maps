@@ -1,8 +1,8 @@
 """Writes the app's peak catalogue and mountain regions as GeoJSON.
 
-Usage: peaks_regions.py PEAKS_REGIONS_PBF COUNTRIES_GEOJSON DEM_DIR OUT_DIR
+Usage: peaks_regions.py PEAKS_REGIONS_PBF COUNTRY_OUTLINES_GEOJSON DEM_DIR OUT_DIR
 
-peaks.json: every natural=peak/volcano node in the coverage area, with
+peaks.json: every natural=peak/volcano node in the covered countries, with
   id ("node/123"), name (the Polish name when OSM has one, else the local
   name, null when unnamed), name_local (the local name when it differs),
   ele (metres), ele_approx (true when ele comes from the terrain data because
@@ -25,20 +25,17 @@ gdal.UseExceptions()
 ogr.UseExceptions()
 gdal.SetConfigOption("OGR_INTERLEAVED_READING", "YES")
 
-# Geofabrik extract names to ISO codes
-COUNTRY_CODES = {
-    "poland": "PL", "czech-republic": "CZ", "slovakia": "SK", "austria": "AT",
-    "switzerland": "CH", "liechtenstein": "LI", "slovenia": "SI", "hungary": "HU",
-    "romania": "RO",
-}
 REGION_COUNTRIES = {"PL", "SK"}
 SIMPLIFY_DEGREES = 0.0003
+# Summits sit on or right next to a border line, whose mapping is not exact to
+# the metre, so a peak this close to a country counts as in it (about 50 m)
+BORDER_TOLERANCE_DEGREES = 0.0005
 
 pbf_path, countries_path, dem_dir, out_dir = sys.argv[1:5]
 
 countries_source = ogr.Open(countries_path)
 countries = [
-    (COUNTRY_CODES.get(feature.GetField("name"), feature.GetField("name")), feature.GetGeometryRef().Clone())
+    (feature.GetField("name"), feature.GetGeometryRef().Clone())
     for feature in countries_source.GetLayer(0)
 ]
 
@@ -46,6 +43,9 @@ countries = [
 def country_of(geometry):
     for code, outline in countries:
         if outline.Intersects(geometry):
+            return code
+    for code, outline in countries:
+        if outline.Distance(geometry) <= BORDER_TOLERANCE_DEGREES:
             return code
     return None
 

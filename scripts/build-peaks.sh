@@ -7,6 +7,7 @@ set -euo pipefail
 source "$(dirname "$0")/config.sh"
 
 [[ -f "$MERGED_PBF" ]] || { echo "Missing $MERGED_PBF, run scripts/download.sh first" >&2; exit 1; }
+[[ -f "$COUNTRY_OUTLINES" ]] || { echo "Missing $COUNTRY_OUTLINES, run scripts/build-borders.sh first" >&2; exit 1; }
 compgen -G "$DEM_DIR/*.tif" >/dev/null || { echo "No elevation tiles, run scripts/download-dem.sh first" >&2; exit 1; }
 
 filtered="$WORK_DIR/peaks-regions.osm.pbf"
@@ -24,7 +25,7 @@ sed 's/^ignore=\(.*\),ele,/ignore=\1,/' /usr/share/gdal/osmconf.ini > "$osmconf"
 
 echo "Writing peaks and regions"
 OSM_CONFIG_FILE="$osmconf" python3 -I -W ignore "$ROOT/scripts/peaks_regions.py" \
-  "$filtered" "$DATA_DIR/countries.geojson" "$DEM_DIR" "$DATA_OUT_DIR"
+  "$filtered" "$COUNTRY_OUTLINES" "$DEM_DIR" "$DATA_OUT_DIR"
 cp "$DATA_DIR/snapshot.txt" "$DATA_OUT_DIR/snapshot.txt"
 
 rm -f "$filtered" "$osmconf"
