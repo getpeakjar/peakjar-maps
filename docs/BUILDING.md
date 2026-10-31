@@ -12,11 +12,12 @@ Austria, Switzerland, Liechtenstein, Slovenia, Hungary and Romania (OSM snapshot
 ## What gets built
 
 ```
-Geofabrik OSM extracts ──► coverage.osm.pbf ──► Planetiler ──► basemap.pmtiles
-                       │                    └─► osmium + GDAL + Tippecanoe ──► trails.pmtiles
-                       └─► .poly boundaries ──► coverage outline (clips everything)
+Geofabrik OSM extracts ──► coverage.osm.pbf ──► osmium + GDAL + Tippecanoe ──► trails.pmtiles
+                       │                    └─► cut to the national borders ──► Planetiler ──► basemap.pmtiles
+                       ├─► boundary relations ──► national borders (cut the map)
+                       └─► .poly boundaries ──► coverage outline (clips contours and terrain)
 
-Natural Earth (from Planetiler's sources) ──► GDAL + Tippecanoe ──► world.pmtiles
+National borders + OSM water + Natural Earth ──► GDAL + Tippecanoe ──► world.pmtiles
 
 Copernicus GLO-30 ──► GDAL ──► contours.pmtiles
                            └─► terrain.mbtiles
@@ -28,17 +29,18 @@ build/ ──► Martin (tiles) + Caddy (static files)  ──►  MapLibre in t
 
 | Output | Size | Build time | Zooms | Contents |
 | --- | --- | --- | --- | --- |
-| `build/world.pmtiles` | 9 MB | 25 s | 0–8 | Sea mask, country silhouettes, lakes and country labels outside the coverage area |
-| `build/basemap.pmtiles` | 4.2 GB | 19.5 min | 0–14 | OpenMapTiles schema: roads, paths, water, land use, places, POIs |
+| `build/world.pmtiles` | 46 MB | 16 min | 0–11 | Mask, sea, lakes and neighbours' borders outside the covered countries, their own land borders, and country labels |
+| `data/outline.geojson`, `data/country_outlines.geojson`, `data/borders.geojsonl`, `data/border_water.geojsonl`, `data/outline.osm.pbf` | 5.4 GB | 15 min | — | The real national borders, the water crossing them, and the OSM data cut to them |
+| `build/basemap.pmtiles` | 4.2 GB | 20 min | 0–14 | OpenMapTiles schema: roads, paths, water, land use, places, POIs |
 | `build/contours.pmtiles` | 2.5 GB | 40 min | 10–14 | Contours every 10 m, layer `contours` |
 | `build/terrain.mbtiles` | 1.1 GB | 31 min | 5–11 | 512 px Terrarium PNG for hillshade and 3D terrain |
 | `build/trails.pmtiles` | 172 MB | 3 min | 8–14 | Hiking routes with trail colour, layer `trails` |
-| `build/data/` | 21 MB | 1.5 min | — | The app's peak catalogue (`peaks.json`, 17 MB) and mountain regions (`regions.json`, 4 MB) |
+| `build/data/` | 21 MB | 5 min | — | The app's peak catalogue (`peaks.json`, 17 MB) and mountain regions (`regions.json`, 4 MB) |
 | `build/static/` | 4.4 MB | seconds | — | Style, fonts, icon sprites, test page |
 
-About 7.9 GB in all, and about 1 h 35 min for a full build including downloads.
+About 8 GB in all, and about 2 h 10 min for a full build including downloads.
 
-Vector tiles stop at zoom 14 (the world layer at 8); MapLibre scales them up
+Vector tiles stop at zoom 14 (the world layer at 11); MapLibre scales them up
 for closer zooms.
 
 ## Running everything at once
@@ -52,7 +54,7 @@ latest output line. Each step's full output goes to `logs/<run>/`. On a
 failure it stops, prints the step's last lines and the command that resumes
 from that step, for example `scripts/build-all.sh --from contours`.
 `--refresh` runs only the steps an OpenStreetMap refresh changes (download,
-base map, trails, static files), and a URL argument is passed on to
+borders, base map, world, trails, peaks, static files), and a URL argument is passed on to
 `build-static.sh`. The sections below explain each step.
 
 ## 1. Prepare the machine
@@ -86,7 +88,9 @@ scripts/download.sh
   boundary (`.poly`) file, and checks every checksum.
 - Builds the **coverage outline** from the boundary files:
   `data/coverage.poly` (for Planetiler) and `data/coverage.geojson` (for GDAL).
-  Every later step clips to it, which keeps neighbouring countries out.
+  These shapes run loosely around each country, several kilometres past its
+  border in places, so they only limit how much gets built. The map itself is
+  cut along the real borders ([step 4](#4-build-the-tile-sets)).
 - Merges the extracts into `data/coverage.osm.pbf` (5.5 GB).
 - Writes the OSM snapshot time to `data/snapshot.txt`. The peaks step copies
   it next to the app's data, so peaks and map can be matched to one snapshot.
@@ -114,15 +118,33 @@ needs by hand (the contour build processes every tile in `data/dem/`).
 Each script can be run on its own once its inputs exist.
 
 ```bash
+scripts/build-borders.sh    # ~15 min
 scripts/build-basemap.sh    # ~20 min
-scripts/build-world.sh      # under a minute
+scripts/build-world.sh      # ~16 min
 scripts/build-trails.sh     # ~3 min
-scripts/build-peaks.sh      # ~1.5 min
+scripts/build-peaks.sh      # ~5 min
 scripts/build-contours.sh   # ~40 min
 scripts/build-terrain.sh    # ~30 min
 ```
 
 Planetiler empties `work/` when it starts, so write build logs somewhere else.
+
+**Borders** (`build-borders.sh`). Reads each country's `admin_level=2` boundary
+relation from its extract, found through its ISO code in `COUNTRY_CODES`
+(`scripts/config.sh`), and writes:
+
+- `data/outline.geojson`: the union of the countries, territorial waters and
+  enclave holes included. The map is cut along it.
+- `data/country_outlines.geojson`: each country on its own, which decides the
+  country of each peak and region.
+- `data/borders.geojsonl`: the land borders as lines. Ways tagged `maritime=yes`,
+  `boundary_type=maritime` or `natural=coastline` are left out, except across
+  the Szczecin and Vistula lagoons, which maps draw like land borders.
+- `data/border_water.geojsonl`: the lakes and rivers that cross the outline.
+- `data/outline.osm.pbf`: the merged OSM file cut to the outline, which the base
+  map reads, so that foreign towns and road numbers have no labels on the map. Named rivers
+  almost wholly abroad are left out too (`scripts/foreign_rivers.py`); rivers
+  along a border keep their names.
 
 **Base map** (`build-basemap.sh`). Planetiler with the OpenMapTiles profile.
 First a short step with network downloads water, coastline and border helper
@@ -130,19 +152,34 @@ data into `data/sources/` (1.4 GB, kept for later builds), then the build runs
 with networking off. `JAVA_HEAP` (default `6g`) must be at least half the
 merged input; `CONTAINER_MEMORY` (default `8g`) caps the container.
 
-**World** (`build-world.sh`). Needs the Natural Earth file that the base map
-step downloads. Takes Natural Earth's countries (from the Polish point of view,
-for disputed borders), large lakes and label points, cuts the coverage area out
-of them with GDAL (`scripts/world_layers.py`) and tiles them with Tippecanoe
-into four layers:
+**World** (`build-world.sh`). Needs the Natural Earth and OSM water files that
+the base map step downloads. Cuts everything along `data/outline.geojson` with
+GDAL (`scripts/world_layers.py`) and tiles it with Tippecanoe into six layers:
 
-- `mask`: the whole world minus the coverage area. The style fills it with
-  the sea colour above all detailed layers, which hides everything outside
-  the coverage area: the base map's edge and the terrain margin.
-- `land`: country silhouettes outside the coverage area, drawn on the mask.
-- `lakes`: large lakes outside the coverage area.
-- `labels`: country names outside the coverage area. Countries inside it are
-  labelled by the base map.
+- `mask`: the whole world minus the covered countries. The style fills it with
+  the land colour above all detailed layers, which hides everything outside
+  them: the base map's edge, the terrain margin, the trails that run on abroad.
+- `sea`: the sea outside the covered countries, on top of the mask. It comes
+  from OSM's water polygons within 2° of the countries, so that the Baltic and
+  Adriatic coasts are as sharp as inside them, and from Natural Earth further away.
+- `lakes`: the far side of the lakes and rivers that cross the borders, from OSM
+  (Lake Geneva, Lake Constance, the Danube), with rivers stopping about 1.5 km
+  past the border, and Natural Earth's large lakes elsewhere. Natural Earth lakes
+  that OSM already draws are left out: it counts the Vistula Lagoon as a lake,
+  and its rough shape would cover the spit.
+- `neighbour_borders`: borders between countries that are not covered, from
+  Natural Earth's Polish point of view for disputed ones. A border that stops
+  just short of the outline is extended to it.
+- `borders`: the covered countries' own land borders, from `data/borders.geojsonl`.
+  The style draws them above the mask, so they are never half hidden, and in
+  place of the base map's `boundary` layer, which also holds sea borders and
+  the ends of the neighbours' borders.
+- `labels`: country names outside the covered countries. Countries inside them
+  are labelled by the base map.
+
+Tiling takes most of the time: the world at z11 is about 5.6 million tiles,
+nearly all of them identical. z11 keeps the mask within about 3 m of the border
+line, which the line's width covers at every zoom.
 
 **Trails** (`build-trails.sh`). Planetiler cannot turn route relations into
 lines, so this uses osmium to extract `route=hiking`/`foot` relations, GDAL to
@@ -168,7 +205,8 @@ same way. The step prints how many lines each colour got.
 OSM file as the tiles so peaks and map agree. `scripts/peaks_regions.py`
 writes `build/data/`:
 
-- `peaks.json`: every `natural=peak`/`volcano` node (about 100,000), with
+- `peaks.json`: every `natural=peak`/`volcano` node in the covered countries,
+  or within about 50 m of their borders (about 99,000), with
   `id` (`node/123`), `name` (the Polish name when OSM has one, else the local
   name; missing for unnamed peaks, which the app labels by elevation),
   `name_local`, `ele`, `ele_approx`, `wikipedia` and `country` (ISO code).
@@ -235,9 +273,12 @@ at commit `40a0d19` (BSD licence, Maki icons CC0, Roboto Apache 2.0) with:
   mark and offset by the segment's `slot`, so routes sharing a path sit side
   by side and a single trail sits on its path. Local routes appear from z11; regional, national and international
   ones from z8;
-- `world_mask`, `world_land`, `world_lakes`, `world_land_outline` and
-  `world_country_label` from the world tile set, above the detailed layers
-  and below the labels;
+- `world_mask`, `world_sea`, `world_lakes`, `world_neighbour_border`,
+  `world_border` and `world_country_label` from the world tile set, above the
+  detailed layers and below the labels. Height labels, road names and road
+  shields stay below the mask, because contours and roads run past the border;
+- the base map's `boundary_3` without maritime lines, and its national border
+  layers replaced by `world_border`;
 - point-of-interest icons that fall back to `circle_11` when the sprite has no
   icon for a class (the OpenMapTiles schema has classes such as `office` and
   `atm` that OSM Liberty never drew). The `poi_*` layers list the sprite's
@@ -287,9 +328,13 @@ filesystems.
   other. A trail alone on a path sits on it, without gaps or side jumps.
 - Lowland (for example Warsaw at z13): few, clean contours.
 - The 3D button (terrain control) raises the mountains.
-- The border of the coverage area: the detailed map gives way to the world
-  layer (sea-coloured background, muted country silhouettes, country labels),
-  with no dark frame or hillshade outside it.
+- The border of the coverage area: the detailed map ends exactly on the border
+  line and gives way to the plain land colour, with no straight clip edges,
+  hillshade, roads or foreign town labels beyond it.
+- The Baltic and the Black Sea: no lines at sea, and coasts outside the coverage
+  area as sharp as the ones inside it (Rügen, Bornholm, the Vistula Spit).
+- Tripoints such as Poland, Lithuania and Belarus: the neighbours' faint border
+  meets the dark one, with no loose ends.
 - Zoomed out to the globe: the whole world is drawn, with the covered
   countries in the lighter land colour.
 
@@ -372,7 +417,7 @@ download from them.
 
 ## Adding a country
 
-Coverage is a single list. To add, for example, Austria:
+Coverage is set in one file. To add, for example, Austria:
 
 1. In `scripts/config.sh`, add its Geofabrik path (the URL path under
    `https://download.geofabrik.de/` without `-latest.osm.pbf`):
@@ -380,6 +425,9 @@ Coverage is a single list. To add, for example, Austria:
    ```bash
    COUNTRIES=(europe/poland europe/czech-republic europe/slovakia europe/austria)
    ```
+
+   and its ISO code to `COUNTRY_CODES` in the same file (`[austria]=AT`), which
+   finds its boundary relation.
 
 2. Check resources. Planetiler needs RAM of at least half the merged input:
    raise `JAVA_HEAP` and `CONTAINER_MEMORY` if the merged file grows past
