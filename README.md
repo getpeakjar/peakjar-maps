@@ -23,11 +23,11 @@ scripts/deploy.sh deploy@your-vps https://maps.peakjar.com
 `build-all.sh --only trails,static` runs just the listed steps,
 and `build-all.sh --refresh` reruns only what an OpenStreetMap refresh
 changes. The steps can also be run one by one: `download.sh`,
-`download-dem.sh`, then `build-basemap.sh`, `build-world.sh`,
+`download-dem.sh`, `build-borders.sh`, then `build-basemap.sh`, `build-world.sh`,
 `build-trails.sh`, `build-peaks.sh`, `build-contours.sh`, `build-terrain.sh`
 and `build-static.sh`.
 
-A full build takes about 1 h 35 min and produces about 8 GB. See
+A full build takes about 2 h 10 min and produces about 8 GB. See
 [docs/BUILDING.md](docs/BUILDING.md) for requirements, what each step does,
 how to check the result, and how to add a country, and
 [docs/DEPLOYING.md](docs/DEPLOYING.md) for putting it on the server.
@@ -77,14 +77,14 @@ is published.
   The server only serves; never build there.
 - **Scratch space:** Planetiler empties `work/` when it starts, so keep
   anything you want to keep, such as logs, elsewhere.
-- **Coverage:** the `COUNTRIES` list in `scripts/config.sh`. Every output
-  covers the whole area (the world layer cuts it out), so a coverage change
-  means rerunning every step.
+- **Coverage:** the `COUNTRIES` and `COUNTRY_CODES` lists in
+  `scripts/config.sh`. Every output covers the whole area (the world layer cuts
+  it out along the real borders), so a coverage change means rerunning every step.
 - **Style:** edit `style/outdoor.json` directly (it is a fork of OSM Liberty),
   validate it against the MapLibre style specification as shown in the build
   guide, and run `scripts/build-static.sh` afterwards. Keep the `world_*`
   layers above the detailed layers and below the labels: the world mask hides
-  everything outside the coverage area.
+  everything outside the covered countries.
 - **Terrain:** the Terrarium encoding breaks under lossy formats or averaging;
   terrain tiles stay lossless PNG with nearest-neighbour overviews.
 - **Credits:** keep credit texts exact. The Copernicus credit must use the

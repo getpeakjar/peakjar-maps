@@ -107,7 +107,7 @@ The script:
 Set `REMOTE_ROOT` to use a folder other than `/srv/peakjar-maps`.
 
 The first upload is the whole build. Later uploads after an OpenStreetMap
-refresh send the base map and trails again; contours and terrain only change
+refresh send the base map, world layer and trails again; contours and terrain only change
 when coverage does.
 
 ## Rolling back
