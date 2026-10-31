@@ -8,16 +8,16 @@
 #   --from STEP   start at STEP, skipping the ones before it
 #   --only STEPS  run just these steps, in pipeline order (e.g. trails,static)
 #   --refresh     only the steps an OpenStreetMap refresh changes (download,
-#                 basemap, trails, peaks, static); elevation and the world
-#                 layer depend on coverage only
+#                 borders, basemap, world, trails, peaks, static); elevation
+#                 depends on coverage only
 #   BASE_URL      passed to build-static.sh (default http://localhost:$LOCAL_PORT)
 #
-# Steps: download dem basemap world trails peaks contours terrain static
+# Steps: download dem borders basemap world trails peaks contours terrain static
 set -euo pipefail
 source "$(dirname "$0")/config.sh"
 
-all_steps=(download dem basemap world trails peaks contours terrain static)
-refresh_steps=(download basemap trails peaks static)
+all_steps=(download dem borders basemap world trails peaks contours terrain static)
+refresh_steps=(download borders basemap world trails peaks static)
 
 usage() { sed -n '/^# Usage/,/^# Steps/s/^# \{0,1\}//p' "$0" >&2; exit 1; }
 
@@ -67,6 +67,7 @@ output_of() {
   case $1 in
     download) echo "$MERGED_PBF" ;;
     dem) echo "$DEM_DIR" ;;
+    borders) echo "$OUTLINE" ;;
     terrain) echo "$BUILD_DIR/terrain.mbtiles" ;;
     peaks) echo "$DATA_OUT_DIR" ;;
     static) echo "$STATIC_DIR" ;;
