@@ -12,6 +12,13 @@ COUNTRIES=(
   europe/hungary europe/romania
 )
 
+# ISO codes of the countries, which find their boundary relations in the extracts
+declare -A COUNTRY_CODES=(
+  [poland]=PL [czech-republic]=CZ [slovakia]=SK
+  [austria]=AT [switzerland]=CH [liechtenstein]=LI [slovenia]=SI
+  [hungary]=HU [romania]=RO
+)
+
 # Planetiler v0.10.2, pinned by digest so the tag cannot be swapped underneath us
 PLANETILER_IMAGE=ghcr.io/onthegomap/planetiler@sha256:b5929b624c335c5a558f73f503890aacba3253f8926b1d6fa8c89108ea797f44
 
@@ -42,4 +49,10 @@ BUILD_DIR="$ROOT/build"
 STATIC_DIR="$BUILD_DIR/static"
 DATA_OUT_DIR="$BUILD_DIR/data"
 MERGED_PBF="$DATA_DIR/coverage.osm.pbf"
+# The merged input cut to the real national borders, which the base map uses
+TRIMMED_PBF="$DATA_DIR/outline.osm.pbf"
+OUTLINE="$DATA_DIR/outline.geojson"
+COUNTRY_OUTLINES="$DATA_DIR/country_outlines.geojson"
+BORDERS="$DATA_DIR/borders.geojsonl"
+BORDER_WATER="$DATA_DIR/border_water.geojsonl"
 DEM_DIR="$DATA_DIR/dem"
