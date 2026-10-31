@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Builds the OpenMapTiles base map (z0-14) from the merged OSM file.
+# Builds the OpenMapTiles base map (z0-14) from the OSM data cut to the real
+# national borders, so no foreign labels are drawn on the world layer around it.
 #
 # Planetiler runs in a locked-down container that sees only this repository's
 # data/, work/ and build/ directories: no home directory, no capabilities, a
@@ -7,7 +8,7 @@
 set -euo pipefail
 source "$(dirname "$0")/config.sh"
 
-[[ -f "$MERGED_PBF" ]] || { echo "Missing $MERGED_PBF, run scripts/download.sh first" >&2; exit 1; }
+[[ -f "$TRIMMED_PBF" ]] || { echo "Missing $TRIMMED_PBF, run scripts/build-borders.sh first" >&2; exit 1; }
 
 # Inside distrobox, podman lives on the host
 podman=(podman)
@@ -26,7 +27,7 @@ planetiler() {
     "$@"
 }
 
-input="/data/$(basename "$MERGED_PBF")"
+input="/data/$(basename "$TRIMMED_PBF")"
 
 echo "Step 1/2: downloading water, coastline and border sources"
 planetiler \
