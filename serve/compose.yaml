@@ -1,0 +1,45 @@
+# Production serving on the VPS with Docker Compose: Martin for tiles behind
+# Caddy for everything else, the same layout as scripts/serve-local.sh.
+#
+# By default Caddy listens on 127.0.0.1:8790 over plain HTTP for a reverse
+# proxy that already owns ports 80/443 and terminates HTTPS. To let Caddy
+# face the internet itself, add compose.tls.yaml (see docs/DEPLOYING.md).
+#
+# Both containers read the current release through the "current" symlink in
+# MAPS_ROOT (default /srv/peakjar-maps) and can write nowhere.
+name: peakjar-maps
+
+x-hardening: &hardening
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  restart: unless-stopped
+
+services:
+  martin:
+    <<: *hardening
+    image: ghcr.io/maplibre/martin@sha256:3b32a18f61c5aeca40b35f665b0f7dc6a0e9459598de23396365ea7e65ccff76
+    command: [--config, /etc/martin.yaml]
+    user: "65534:65534"
+    mem_limit: 768m
+    volumes:
+      - ${MAPS_ROOT:-/srv/peakjar-maps}/current:/tiles:ro
+      - ./martin.yaml:/etc/martin.yaml:ro
+
+  caddy:
+    <<: *hardening
+    image: docker.io/library/caddy@sha256:04913b1da43339a40ad1ea87827d70a576ac5aa6cf674c6e24fdca675887533a
+    # The Caddy binary carries the bind-low-ports file capability and will
+    # not start without it
+    cap_add: [NET_BIND_SERVICE]
+    mem_limit: 256m
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:8080}
+      MARTIN_UPSTREAM: martin:3000
+    ports:
+      - 127.0.0.1:${MAPS_PORT:-8790}:8080
+    tmpfs: [/data, /config]
+    volumes:
+      - ${MAPS_ROOT:-/srv/peakjar-maps}/current/static:/srv:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on: [martin]
