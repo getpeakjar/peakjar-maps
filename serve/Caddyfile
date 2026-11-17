@@ -3,6 +3,17 @@
 # locally and behind another reverse proxy, or the maps domain when Caddy
 # faces the internet and handles HTTPS itself. MARTIN_UPSTREAM is
 # "localhost:3000" in the local pod and "martin:3000" under Docker Compose.
+
+# Behind another reverse proxy, trust its X-Forwarded-Proto and Host so
+# Martin writes https:// tile URLs into its TileJSON. Without this Caddy
+# replaces them with its own plain-HTTP view, and native apps, which do not
+# upgrade http:// like browsers with HSTS, load no tiles.
+{
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
 {$SITE_ADDRESS::8080} {
 	# Only Peakjar's sites and local development may use the map in a browser.
 	# Native apps send no Origin and are not affected. Martin answers every
