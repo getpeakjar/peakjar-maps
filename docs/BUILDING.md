@@ -490,7 +490,7 @@ a new release ([step 9](#9-publish-the-app-data)).
 | GDAL: `Too many features have accumulated in points layer` | Route relations must be copied to a GeoPackage before reading them; `build-trails.sh` already does this. |
 | Port 8790 already in use | Set `LOCAL_PORT`, then rerun `build-static.sh` and `serve-local.sh`. (On a Steam Deck, 8080 is taken by Steam's browser debugger.) |
 | Caddy exits with `Operation not permitted` | The Caddy binary needs `NET_BIND_SERVICE`; `serve-local.sh` already grants only that. |
-| Tiles blocked by CORS in the browser | Martin and Caddy both adding `Access-Control-Allow-Origin` doubles the header; the Caddyfile only adds it where missing. |
+| Tiles blocked by CORS in the browser | The map answers only Peakjar's sites (`peakjar.com`, `app.peakjar.com`) and local development (`localhost`, `127.0.0.1`, `10.*`, `192.168.*`); add other origins to `@allowed_origin` in `serve/Caddyfile`. Caddy drops Martin's own header, because a doubled one is rejected. |
 
 ## Attribution
 

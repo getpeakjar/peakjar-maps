@@ -4,9 +4,12 @@
 # faces the internet and handles HTTPS itself. MARTIN_UPSTREAM is
 # "localhost:3000" in the local pod and "martin:3000" under Docker Compose.
 {$SITE_ADDRESS::8080} {
-	# Martin sets this on tiles itself; "?" only adds it where it is missing,
-	# because browsers reject a doubled header
-	header ?Access-Control-Allow-Origin *
+	# Only Peakjar's sites and local development may use the map in a browser.
+	# Native apps send no Origin and are not affected. Martin answers every
+	# origin itself, so its header is dropped below and set here instead.
+	@allowed_origin header_regexp Origin ^(https://(app\.)?peakjar\.com|https?://(localhost|127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+)(:\d+)?)$
+	header @allowed_origin Access-Control-Allow-Origin {http.request.header.Origin}
+	header Vary Origin
 
 	# Tiles and fonts change only with a new release; a CDN or the app's
 	# cache can keep them for a day. The style is re-checked more often so
@@ -17,7 +20,9 @@
 	header /style/* Cache-Control "public, max-age=300"
 
 	handle /tiles/* {
-		reverse_proxy {$MARTIN_UPSTREAM:localhost:3000}
+		reverse_proxy {$MARTIN_UPSTREAM:localhost:3000} {
+			header_down -Access-Control-Allow-Origin
+		}
 	}
 
 	handle {
