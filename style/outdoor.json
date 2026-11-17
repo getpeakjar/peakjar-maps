@@ -7,26 +7,30 @@
   "sources": {
     "world": {
       "type": "vector",
-      "url": "{BASE_URL}/tiles/world"
+      "url": "{BASE_URL}/tiles/world",
+      "attribution": "<a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">© OpenStreetMap contributors</a>"
     },
     "openmaptiles": {
       "type": "vector",
-      "url": "{BASE_URL}/tiles/basemap"
+      "url": "{BASE_URL}/tiles/basemap",
+      "attribution": "<a href=\"https://openmaptiles.org/\" target=\"_blank\">© OpenMapTiles</a> <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">© OpenStreetMap contributors</a>"
     },
     "trails": {
       "type": "vector",
-      "url": "{BASE_URL}/tiles/trails"
+      "url": "{BASE_URL}/tiles/trails",
+      "attribution": "<a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">© OpenStreetMap contributors</a>"
     },
     "contours": {
       "type": "vector",
-      "url": "{BASE_URL}/tiles/contours"
+      "url": "{BASE_URL}/tiles/contours",
+      "attribution": "<a href=\"https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM\" target=\"_blank\">Copernicus WorldDEM-30</a>"
     },
     "terrain": {
       "type": "raster-dem",
       "url": "{BASE_URL}/tiles/terrain",
       "tileSize": 512,
       "encoding": "terrarium",
-      "attribution": "produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved"
+      "attribution": "<a href=\"https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM\" target=\"_blank\">Copernicus WorldDEM-30</a>"
     }
   },
   "sprite": "{BASE_URL}/sprites/osm-liberty",
