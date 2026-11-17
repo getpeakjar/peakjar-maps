@@ -77,7 +77,15 @@ maps.peakjar.com {
 }
 ```
 
-### A CDN in front (recommended)
+#### Who may use the map
+
+In a browser, only Peakjar's sites and local development may load the map:
+Caddy sends `Access-Control-Allow-Origin` only for the origins in
+`@allowed_origin` in `serve/Caddyfile`. Native apps send no `Origin` and are
+not affected. On the Peakjar VPS, nginx also rejects requests whose `Referer`
+is another site, and fail2ban bans clients that keep hitting the rate limit.
+
+## A CDN in front (recommended)
 
 Tiles, fonts and sprites are sent with `Cache-Control` headers (one day for
 tiles, a week for fonts, five minutes for the style). Putting a CDN such as
