@@ -94,10 +94,11 @@ is published.
 
 ## Attribution
 
-Maps using these tiles must credit © OpenStreetMap contributors (ODbL),
-© OpenMapTiles, Natural Earth, and "produced using Copernicus WorldDEM-30 © DLR e.V.
-2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under
-COPERNICUS by the European Union and ESA; all rights reserved". See
+Maps using these tiles must credit © OpenStreetMap contributors (ODbL) and
+© OpenMapTiles on the map, and Copernicus WorldDEM-30 with its full notice
+("produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus
+Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European
+Union and ESA; all rights reserved") in the product. See
 [docs/BUILDING.md](docs/BUILDING.md#attribution) for the full list of credits
 and legal notices. The style is derived from OSM Liberty; see
 [style/LICENSE-osm-liberty.md](style/LICENSE-osm-liberty.md).

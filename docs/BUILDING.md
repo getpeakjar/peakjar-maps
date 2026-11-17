@@ -496,21 +496,25 @@ a new release ([step 9](#9-publish-the-app-data)).
 
 All sources allow commercial use. Their conditions are credits and notices.
 
-**On the map** (MapLibre's attribution control shows these automatically: the
-vector tile sets carry their credits in their TileJSON, and the style adds the
-Copernicus credit to the terrain source):
+**On the map** the style sets a short credit on every source, which takes
+precedence over the credits stored in the tile sets, so changing it needs no
+tile rebuild. MapLibre's attribution control shows each credit once and, on
+maps up to 640 px wide, starts expanded and folds into an ⓘ button once the
+map is moved, as the OpenStreetMap attribution guidelines allow:
 
 - [© OpenMapTiles](https://openmaptiles.org/) and
   [© OpenStreetMap contributors](https://www.openstreetmap.org/copyright),
   as links
-- [Natural Earth](https://www.naturalearthdata.com/) (public domain; the
-  credit is a courtesy and comes from the world tile set's TileJSON)
-- produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus
-  Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European
-  Union and ESA; all rights reserved
+- [Copernicus WorldDEM-30](https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM),
+  as a link; the full notice ("produced using Copernicus WorldDEM-30 © DLR
+  e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under
+  COPERNICUS by the European Union and ESA; all rights reserved") is in the
+  app's licences screen
+- Natural Earth is public domain and needs no credit on the map
 
-The contour tiles store their credit inside the tile set, so a change to it
-needs `build-contours.sh` to run again.
+The tile sets still carry the long credits in their TileJSON (MapLibre Native
+may show those in its ⓘ dialog); align them in the `build-*.sh` scripts at the
+next rebuild.
 
 **In the app's licences screen** (Settings → About in the Peakjar app):
 
