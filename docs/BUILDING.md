@@ -412,6 +412,10 @@ behind the data are merged, so the tag points at a commit on `main`.
    `pnpm data:sync` in `client/`. It downloads the files and rebuilds the
    bundled peaks database.
 
+4. Add an entry to [CHANGELOG.md](../CHANGELOG.md) naming the
+   release and its counts, in the pull request with the changes behind the
+   data or in a short one after it.
+
 Leave published releases in place, because older checkouts of the app still
 download from them.
 
