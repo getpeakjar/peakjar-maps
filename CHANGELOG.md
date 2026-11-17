@@ -24,12 +24,17 @@ requests at the end of each date.
 
 - **Attribution**: Shortened the credits shown on the map to "© OpenMapTiles © OpenStreetMap contributors | Copernicus WorldDEM-30", with Copernicus as a link instead of its full notice, so they no longer cover much of a phone screen. The full Copernicus notice is in the app under Settings → About (app 0.3.0 or later). Natural Earth, which is public domain, is no longer credited on the map. Only the style changed; the tiles do not need rebuilding. [#3]
 
+### Fixed
+
+- **Native Apps**: The map now loads in the iOS and Android apps. Behind the VPS's nginx, the tile addresses the server handed out started with `http://`, which the apps refuse to load; they now start with `https://`. Browsers were not affected. Only the server configuration changed. [#5]
+
 ### Security
 
 - **Browser Access**: The map answers browsers only on Peakjar sites (`peakjar.com`, `app.peakjar.com`) and local development addresses, so other websites can no longer show it and load the server. The native apps send no `Origin` and are not affected. [#2]
 
 [#2]: https://github.com/getpeakjar/peakjar-maps/pull/2
 [#3]: https://github.com/getpeakjar/peakjar-maps/pull/3
+[#5]: https://github.com/getpeakjar/peakjar-maps/pull/5
 
 ## 2026-11-05
 
