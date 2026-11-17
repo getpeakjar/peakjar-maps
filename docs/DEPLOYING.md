@@ -96,7 +96,7 @@ rate-limiting rule there if the proxy cannot do it (option B).
 
 ## Deploying a release
 
-From the build machine, on an up-to-date `main`, after building every tile set:
+From the build machine, on a clean, up-to-date `main`, after building every tile set:
 
 ```bash
 scripts/deploy.sh deploy@your-vps https://maps.peakjar.com
@@ -104,13 +104,17 @@ scripts/deploy.sh deploy@your-vps https://maps.peakjar.com
 
 The script:
 
-1. builds the style for the public URL (and restores the local one at the end);
-2. uploads the tiles and static files to `/srv/peakjar-maps/releases/<time>/`,
+1. stops unless the checkout is clean and at `origin/main`;
+2. builds the style for the public URL (and restores the local one at the end);
+3. uploads the tiles and static files to `/srv/peakjar-maps/releases/<time>/`,
    hard-linking files that have not changed since the current release;
-3. uploads the Compose, Martin and Caddy configuration to `serve/`;
-4. switches the `current` symlink and recreates the containers;
-5. keeps the two newest releases and deletes older ones;
-6. checks that the style and the tile catalogue answer on the public URL.
+4. uploads the Compose, Martin and Caddy configuration to `serve/`;
+5. switches the `current` symlink and recreates the containers;
+6. keeps the two newest releases and deletes older ones;
+7. checks that the style and the tile catalogue answer on the public URL;
+8. tags the deployed commit `map-<time>`, with the same name as the release
+   folder, and pushes the tag. If the push fails, the script prints the command
+   to push it by hand.
 
 Set `REMOTE_ROOT` to use a folder other than `/srv/peakjar-maps`.
 
@@ -126,6 +130,9 @@ ls releases/                       # the previous release is still there
 ln -sfn releases/<previous> current.new && mv -T current.new current
 cd serve && docker compose up -d --force-recreate
 ```
+
+The tag `map-<previous>` in the repository shows which commit that release was
+built from (`git show map-<previous>`).
 
 ## Keeping it running
 
