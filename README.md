@@ -60,11 +60,18 @@ is published.
   `main` into it.
 - **Commit subjects:** capitalized, imperative, no trailing period, for example
   `Add Germany to the coverage`.
-- **Deploying:** run `scripts/deploy.sh` from an up-to-date `main`, because it
-  uploads from the local clone.
+- **Changelog:** a pull request that changes the map, the server
+  configuration or the app data adds an entry to [CHANGELOG.md](CHANGELOG.md)
+  under the date it is merged. Changes to scripts, docs and tooling only need
+  one when they change what users or the app get.
+- **Deploying:** run `scripts/deploy.sh` from a clean, up-to-date `main`; it
+  refuses anything else, because it uploads from the local clone. It tags the
+  deployed commit `map-YYYYMMDDTHHMMSSZ`, the name of the release folder on the
+  server, and pushes the tag.
 - **Data releases:** publish from `main` as `peaks-regions-osm-YYYY-MM-DD`; see
   [step 9 of the build guide](docs/BUILDING.md#9-publish-the-app-data). This
-  repository has no version numbers or release branches.
+  repository has no version numbers or release branches: the `map-*` and
+  `peaks-regions-osm-*` tags and the dated changelog take their place.
 
 ## Rules for contributors
 
