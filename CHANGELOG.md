@@ -7,9 +7,10 @@ into `main`, newest first. What reaches users is marked by tags:
 - `map-YYYYMMDDTHHMMSSZ`: a deploy of the tiles, style and server
   configuration to the VPS, named like its release folder on the server.
   `scripts/deploy.sh` creates it.
-- `peaks-regions-osm-YYYY-MM-DD`: a GitHub release of the app's peak and region
-  data. The app picks it up when its `client/scripts/download-geo-data.mjs`
-  points at it.
+- `peaks-regions-osm-YYYY-MM-DD`: a release of the app's peak and region data
+  in the public `getpeakjar/peakjar-data` repository, with the same tag on the
+  commit here that built it. `scripts/publish-data.sh` creates both. The app
+  picks it up when its `client/scripts/download-geo-data.mjs` points at it.
 
 The style is served live, so a deployed style change reaches every installed
 version of the app at once. Say so when a change needs a minimum app version.
@@ -17,6 +18,12 @@ version of the app at once. Say so when a change needs a minimum app version.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 with the merge date in place of a version number and the links to pull
 requests at the end of each date.
+
+## 2026-11-21
+
+### Changed
+
+- **App Data**: The app's peak and region data is now published as releases of the public [`getpeakjar/peakjar-data`](https://github.com/getpeakjar/peakjar-data) repository instead of this one, by the new `scripts/publish-data.sh`, with a `SHA256SUMS` file for checking downloads. `peaks-regions-osm-2026-10-28` is copied there unchanged. The data is the same; the app uses the new address once its download script points there.
 
 ## 2026-11-17
 

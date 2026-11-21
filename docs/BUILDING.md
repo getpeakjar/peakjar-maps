@@ -221,8 +221,8 @@ writes `build/data/`:
 
 GDAL's default OSM configuration drops the `ele` tag, so the script reads
 the data with a copy that keeps it. The step prints peak counts per country.
-The app downloads these files from a GitHub release of this repository; see
-[step 9](#9-publish-the-app-data).
+The app downloads these files from a release of the public
+`getpeakjar/peakjar-data` repository; see [step 9](#9-publish-the-app-data).
 
 **Contours** (`build-contours.sh`). `gdal_contour` traces 10 m contours per
 elevation tile in parallel. Each line gets `ele` and `level` (100, 50 or 10).
@@ -370,54 +370,43 @@ Put the build on the VPS with `scripts/deploy.sh`; see
 ## 9. Publish the app data
 
 The app does not use `build/data/` directly: `pnpm data:sync` in the client
-downloads `peaks.json` and `regions.json` from a GitHub release of this
-repository. Publish a release whenever those files change.
+downloads `peaks.json` and `regions.json` from a release of the public
+[`getpeakjar/peakjar-data`](https://github.com/getpeakjar/peakjar-data)
+repository (`DATA_REPO` in `scripts/config.sh`). This repository is private;
+the data repository makes the data itself public, as the ODbL requires, and
+its README describes how it is made. Publish a release whenever those files
+change.
 
 Releases are named `peaks-regions-osm-YYYY-MM-DD`, where the date is the OSM
-snapshot in `build/data/snapshot.txt`. Publish from `main` once the changes
-behind the data are merged, so the tag points at a commit on `main`.
+snapshot in `build/data/snapshot.txt`. A second build of the same snapshot
+gets a suffix: `peaks-regions-osm-YYYY-MM-DD-2`. Releases are public and are
+never replaced or deleted, because older checkouts of the app still download
+from them.
 
-1. Write the release notes to a file, here `work/release-notes.md`, with the
-   counts the peaks step printed. The licence and credit text must stay:
+1. Merge the changes behind the data into `main`, then check out and pull
+   `main`.
 
-   ```markdown
-   Peak catalogue and mountain regions for the Peakjar app, built from the OpenStreetMap snapshot of YYYY-MM-DD (the same snapshot as the map tiles).
-
-   - `peaks.json`: N peaks in <countries> (N named), with OSM id, name, elevation and country.
-   - `regions.json`: N geomorphological units and mountain ranges in Poland (N) and Slovakia (N).
-   - `snapshot.txt`: the OpenStreetMap snapshot time.
-
-   Built with `scripts/build-peaks.sh`; see `docs/BUILDING.md`.
-
-   ## Licence and credits
-
-   Data © OpenStreetMap contributors, available under the Open Database License (ODbL): https://www.openstreetmap.org/copyright
-
-   Approximate peak heights (`ele_approx`) were produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30.
-   ```
-
-2. Create the release:
+2. Publish:
 
    ```bash
-   snapshot=$(cut -c1-10 build/data/snapshot.txt)
-   gh release create "peaks-regions-osm-$snapshot" \
-     build/data/peaks.json build/data/regions.json build/data/snapshot.txt \
-     --target main \
-     --title "Peaks and regions, OSM snapshot $snapshot" \
-     --notes-file work/release-notes.md
+   scripts/publish-data.sh                 # or: scripts/publish-data.sh peaks-regions-osm-YYYY-MM-DD-2
    ```
 
-3. In the app repository, set `VERSION` in
-   `client/scripts/download-geo-data.mjs` to the new release name and run
-   `pnpm data:sync` in `client/`. It downloads the files and rebuilds the
-   bundled peaks database.
+   It refuses to run unless the checkout is a clean `origin/main`, and refuses
+   a release name that already exists. It writes `SHA256SUMS`, writes the
+   release notes (counts, the commit that built the data, and the licence and
+   credit texts), shows them and asks before publishing. After publishing it
+   tags the commit here with the release name and pushes the tag, so every
+   data release maps to the code that made it.
+
+3. In the app repository, set `VERSION` and the checksums in
+   `client/scripts/download-geo-data.mjs` to what the script printed, and run
+   `pnpm data:sync` in `client/`. It downloads and checks the files and
+   rebuilds the bundled peaks database.
 
 4. Add an entry to [CHANGELOG.md](../CHANGELOG.md) naming the
    release and its counts, in the pull request with the changes behind the
    data or in a short one after it.
-
-Leave published releases in place, because older checkouts of the app still
-download from them.
 
 ## Adding a country
 
@@ -527,9 +516,10 @@ next rebuild.
   peak catalogue counts too: approximate peak heights come from Copernicus, so
   its credit belongs with the peak data as well. The
   ODbL requires offering the map data, or how it was made, to anyone who gets
-  it from the app (offline packs count). Keep this repository public, or state
-  that the data is available on request. Do not encrypt offline packs without
-  also offering an unencrypted copy.
+  it from the app (offline packs count). This repository is private, so the
+  peak data is public in `getpeakjar/peakjar-data` and the app states that
+  the map data is available on request (hello@peakjar.com). Do not encrypt
+  offline packs without also offering an unencrypted copy.
 - The Copernicus liability sentence, required by the licence: "The
   organisations in charge of the Copernicus programme by law or by delegation
   do not incur any liability for any use of the Copernicus WorldDEM-30". Do

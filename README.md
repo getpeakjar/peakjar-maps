@@ -37,7 +37,7 @@ how to check the result, and how to add a country, and
 | Path | Contents |
 | --- | --- |
 | `scripts/` | Download, build and serve scripts; settings in `scripts/config.sh` |
-| `build/data/` | (built) The app's peaks and regions, published as GitHub releases |
+| `build/data/` | (built) The app's peaks and regions, published as releases of the public [`peakjar-data`](https://github.com/getpeakjar/peakjar-data) repository |
 | `style/` | The Peakjar Outdoor style (a fork of OSM Liberty) and its icon sprites |
 | `serve/` | Martin and Caddy configuration for local serving and the VPS (Docker Compose), and the test page |
 | `docs/` | The build and deployment guides |
@@ -68,7 +68,10 @@ is published.
   refuses anything else, because it uploads from the local clone. It tags the
   deployed commit `map-YYYYMMDDTHHMMSSZ`, the name of the release folder on the
   server, and pushes the tag.
-- **Data releases:** publish from `main` as `peaks-regions-osm-YYYY-MM-DD`; see
+- **Data releases:** run `scripts/publish-data.sh` from a clean, up-to-date
+  `main`. It publishes `peaks-regions-osm-YYYY-MM-DD` as a release of the
+  public `getpeakjar/peakjar-data` repository and tags the commit here with
+  the same name; see
   [step 9 of the build guide](docs/BUILDING.md#9-publish-the-app-data). This
   repository has no version numbers or release branches: the `map-*` and
   `peaks-regions-osm-*` tags and the dated changelog take their place.
