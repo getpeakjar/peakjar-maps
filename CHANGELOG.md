@@ -23,7 +23,9 @@ requests at the end of each date.
 
 ### Changed
 
-- **App Data**: The app's peak and region data is now published as releases of the public [`getpeakjar/peakjar-data`](https://github.com/getpeakjar/peakjar-data) repository instead of this one, by the new `scripts/publish-data.sh`, with a `SHA256SUMS` file for checking downloads. `peaks-regions-osm-2026-10-28` is copied there unchanged. The data is the same; the app uses the new address once its download script points there.
+- **App Data**: The app's peak and region data is now published as releases of the public [`getpeakjar/peakjar-data`](https://github.com/getpeakjar/peakjar-data) repository instead of this one, by the new `scripts/publish-data.sh`, with a `SHA256SUMS` file for checking downloads. `peaks-regions-osm-2026-10-28` is copied there unchanged. The data is the same; the app uses the new address once its download script points there. [#6]
+
+[#6]: https://github.com/getpeakjar/peakjar-maps/pull/6
 
 ## 2026-11-17
 
