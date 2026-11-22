@@ -51,6 +51,9 @@ WORK_DIR="$ROOT/work"
 BUILD_DIR="$ROOT/build"
 STATIC_DIR="$BUILD_DIR/static"
 DATA_OUT_DIR="$BUILD_DIR/data"
+# The commit that built DATA_OUT_DIR and the checksums of what it built,
+# written by build-peaks.sh and checked by publish-data.sh
+DATA_BUILD_RECORD="$DATA_OUT_DIR/built-from.txt"
 MERGED_PBF="$DATA_DIR/coverage.osm.pbf"
 # The merged input cut to the real national borders, which the base map uses
 TRIMMED_PBF="$DATA_DIR/outline.osm.pbf"

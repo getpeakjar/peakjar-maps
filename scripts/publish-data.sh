@@ -9,9 +9,11 @@
 #
 # Releases are never replaced: an existing name is refused. The release notes
 # carry the counts, the commit of this repository that built the data, and the
-# licence and credit texts. The same commit is tagged with the release name
-# here and the tag pushed, so every data release maps to the code that made it.
-# The script therefore runs only from a clean checkout of origin/main.
+# licence and credit texts. That commit comes from the record build-peaks.sh
+# writes, not from the checkout being published from, and is tagged with the
+# release name here, so every data release maps to the code that made it. The
+# script therefore runs only from a clean checkout of origin/main, and only for
+# unchanged files built without uncommitted changes from a commit on main.
 set -euo pipefail
 source "$(dirname "$0")/config.sh"
 
@@ -31,6 +33,16 @@ for file in "${files[@]}"; do
   [[ -f "$DATA_OUT_DIR/$file" ]] || { echo "Missing build/data/$file, run scripts/build-all.sh --only peaks first" >&2; exit 1; }
 done
 
+[[ -f "$DATA_BUILD_RECORD" ]] || {
+  echo "No record of the commit that built build/data; rebuild it with scripts/build-all.sh --only peaks" >&2; exit 1; }
+commit=$(head -n 1 "$DATA_BUILD_RECORD")
+if [[ $commit == *-dirty ]]; then
+  echo "build/data was built with uncommitted changes; rebuild it from main with scripts/build-all.sh --only peaks" >&2; exit 1
+fi
+if [[ ! $commit =~ ^[0-9a-f]{40}$ ]] || ! git merge-base --is-ancestor "$commit" origin/main 2>/dev/null; then
+  echo "build/data was built from a commit that is not on main; rebuild it from main with scripts/build-all.sh --only peaks" >&2; exit 1
+fi
+
 snapshot=$(cut -c1-10 "$DATA_OUT_DIR/snapshot.txt")
 release=${1:-peaks-regions-osm-$snapshot}
 [[ $release =~ ^peaks-regions-osm-[0-9]{4}-[0-9]{2}-[0-9]{2}(-[0-9]+)?$ ]] || {
@@ -48,7 +60,10 @@ staging=$(mktemp -d)
 trap 'rm -rf "$staging"' EXIT
 cp "${files[@]/#/$DATA_OUT_DIR/}" "$staging/"
 (cd "$staging" && sha256sum "${files[@]}" > SHA256SUMS)
-commit=$(git rev-parse --short=12 HEAD)
+if ! cmp -s <(tail -n +2 "$DATA_BUILD_RECORD") "$staging/SHA256SUMS"; then
+  echo "build/data changed after it was built; rebuild it with scripts/build-all.sh --only peaks" >&2; exit 1
+fi
+short_commit=${commit:0:12}
 
 # Counts for the notes, in the same wording as earlier releases
 summary=$(python3 -I - "$staging" <<'EOF'
@@ -91,7 +106,7 @@ $summary
 - \`snapshot.txt\`: the OpenStreetMap snapshot time.
 - \`SHA256SUMS\`: checksums of the files above (\`sha256sum -c SHA256SUMS\`).
 
-Built from commit \`$commit\` of the map repository. How the data is made: see the [README](https://github.com/$DATA_REPO#how-the-data-is-made).
+Built from commit \`$short_commit\` of the map repository. How the data is made: see the [README](https://github.com/$DATA_REPO#how-the-data-is-made).
 
 ## Licence and credits
 
@@ -100,7 +115,7 @@ Data © OpenStreetMap contributors, available under the Open Database License (O
 Approximate peak heights (\`ele_approx\`) were produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30.
 EOF
 
-echo "Release $release for $DATA_REPO, built from $commit:"
+echo "Release $release for $DATA_REPO, built from $short_commit:"
 echo
 cat "$notes"
 echo
@@ -112,7 +127,7 @@ gh release create "$release" --repo "$DATA_REPO" --target main \
   --notes-file "$notes" \
   "${files[@]/#/$staging/}" "$staging/SHA256SUMS"
 
-git tag -a "$release" -m "Peak and region data published as $DATA_REPO release $release"
+git tag -a "$release" -m "Peak and region data published as $DATA_REPO release $release" "$commit"
 git push --quiet origin "$release" || echo "Could not push $release; push it with: git push origin $release" >&2
 
 echo

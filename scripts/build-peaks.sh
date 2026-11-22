@@ -13,6 +13,11 @@ compgen -G "$DEM_DIR/*.tif" >/dev/null || { echo "No elevation tiles, run script
 filtered="$WORK_DIR/peaks-regions.osm.pbf"
 osmconf="$WORK_DIR/osmconf-peaks.ini"
 mkdir -p "$WORK_DIR" "$DATA_OUT_DIR"
+# Noted before building, as the checkout can change meanwhile; the old record
+# goes first, so a failed build cannot pass as the previous one
+rm -f "$DATA_BUILD_RECORD"
+commit=$(git -C "$ROOT" rev-parse HEAD)
+git -C "$ROOT" diff --quiet HEAD || commit+=-dirty
 
 echo "Extracting peaks, geomorphological units and mountain ranges"
 osmium tags-filter --overwrite "$MERGED_PBF" \
@@ -27,6 +32,8 @@ echo "Writing peaks and regions"
 OSM_CONFIG_FILE="$osmconf" python3 -I -W ignore "$ROOT/scripts/peaks_regions.py" \
   "$filtered" "$COUNTRY_OUTLINES" "$DEM_DIR" "$DATA_OUT_DIR"
 cp "$DATA_DIR/snapshot.txt" "$DATA_OUT_DIR/snapshot.txt"
+checksums=$(cd "$DATA_OUT_DIR" && sha256sum peaks.json regions.json snapshot.txt)
+printf '%s\n' "$commit" "$checksums" > "$DATA_BUILD_RECORD"
 
 rm -f "$filtered" "$osmconf"
 ls -lh "$DATA_OUT_DIR"
