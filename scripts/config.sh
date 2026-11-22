@@ -26,6 +26,9 @@ PLANETILER_IMAGE=ghcr.io/onthegomap/planetiler@sha256:b5929b624c335c5a558f73f503
 MARTIN_IMAGE=ghcr.io/maplibre/martin@sha256:3b32a18f61c5aeca40b35f665b0f7dc6a0e9459598de23396365ea7e65ccff76
 CADDY_IMAGE=docker.io/library/caddy@sha256:04913b1da43339a40ad1ea87827d70a576ac5aa6cf674c6e24fdca675887533a
 
+# Public repository whose releases carry the app's peak and region data
+DATA_REPO=getpeakjar/peakjar-data
+
 # Port for scripts/serve-local.sh (8080 is often taken, e.g. by Steam on a Steam Deck)
 LOCAL_PORT=${LOCAL_PORT:-8790}
 # Address it listens on: 127.0.0.1 for this machine only, or the LAN IP so
@@ -48,6 +51,9 @@ WORK_DIR="$ROOT/work"
 BUILD_DIR="$ROOT/build"
 STATIC_DIR="$BUILD_DIR/static"
 DATA_OUT_DIR="$BUILD_DIR/data"
+# The commit that built DATA_OUT_DIR and the checksums of what it built,
+# written by build-peaks.sh and checked by publish-data.sh
+DATA_BUILD_RECORD="$DATA_OUT_DIR/built-from.txt"
 MERGED_PBF="$DATA_DIR/coverage.osm.pbf"
 # The merged input cut to the real national borders, which the base map uses
 TRIMMED_PBF="$DATA_DIR/outline.osm.pbf"
