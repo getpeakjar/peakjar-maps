@@ -374,10 +374,12 @@ Put the build on the VPS with `scripts/deploy.sh`; see
 The app does not use `build/data/` directly: `pnpm data:sync` in the client
 downloads `peaks.json` and `regions.json` from a release of the public
 [`getpeakjar/peakjar-data`](https://github.com/getpeakjar/peakjar-data)
-repository (`DATA_REPO` in `scripts/config.sh`). This repository is private;
-the data repository makes the data itself public, as the ODbL requires, and
-its README describes how it is made. Publish a release whenever those files
-change.
+repository (`DATA_REPO` in `scripts/config.sh`). The data repository makes the
+data itself public, as the ODbL requires, and its README describes how it is
+made, so this repository can become private. Keep it public until an app
+release that downloads from `peakjar-data` is deployed: v0.3.0 and earlier
+download from this repository and link to it. Publish a release whenever those
+files change.
 
 Releases are named `peaks-regions-osm-YYYY-MM-DD`, where the date is the OSM
 snapshot in `build/data/snapshot.txt`. A second build of the same snapshot
@@ -402,13 +404,13 @@ from them.
    files built without uncommitted changes from a commit on `main`. It writes `SHA256SUMS`, writes the
    release notes (counts, the commit that built the data, and the licence and
    credit texts), shows them and asks before publishing. After publishing it
-   tags the commit here with the release name and pushes the tag, so every
-   data release maps to the code that made it.
+   tags the commit that built the data with the release name and pushes the
+   tag, so every data release maps to the code that made it.
 
 3. In the app repository, set `VERSION` and the checksums in
    `client/scripts/download-geo-data.mjs` to what the script printed, and run
    `pnpm data:sync` in `client/`. It downloads and checks the files and
-   rebuilds the bundled peaks database.
+   rebuilds the app's peaks database and web data files.
 
 4. Add an entry to [CHANGELOG.md](../CHANGELOG.md) naming the
    release and its counts, in the pull request with the changes behind the
@@ -522,10 +524,12 @@ next rebuild.
   peak catalogue counts too: approximate peak heights come from Copernicus, so
   its credit belongs with the peak data as well. The
   ODbL requires offering the map data, or how it was made, to anyone who gets
-  it from the app (offline packs count). This repository is private, so the
-  peak data is public in `getpeakjar/peakjar-data` and the app states that
-  the map data is available on request (hello@peakjar.com). Do not encrypt
-  offline packs without also offering an unencrypted copy.
+  it from the app (offline packs count). The peak data is public in
+  `getpeakjar/peakjar-data`. For the map data, app releases after v0.3.0 state
+  that it is available on request (hello@peakjar.com); v0.3.0 and earlier
+  point to this repository, which therefore stays public until a later release
+  is deployed. Do not encrypt offline packs without also offering an
+  unencrypted copy.
 - The Copernicus liability sentence, required by the licence: "The
   organisations in charge of the Copernicus programme by law or by delegation
   do not incur any liability for any use of the Copernicus WorldDEM-30". Do

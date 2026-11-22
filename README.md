@@ -68,10 +68,11 @@ is published.
   refuses anything else, because it uploads from the local clone. It tags the
   deployed commit `map-YYYYMMDDTHHMMSSZ`, the name of the release folder on the
   server, and pushes the tag.
-- **Data releases:** run `scripts/publish-data.sh` from a clean, up-to-date
-  `main`. It publishes `peaks-regions-osm-YYYY-MM-DD` as a release of the
-  public `getpeakjar/peakjar-data` repository and tags the commit here with
-  the same name; see
+- **Data releases:** from a clean, up-to-date `main`, rebuild the data with
+  `scripts/build-all.sh --only peaks`, then run `scripts/publish-data.sh`,
+  which refuses data built anywhere else or changed since. It publishes `peaks-regions-osm-YYYY-MM-DD` as a release of the
+  public `getpeakjar/peakjar-data` repository and tags the commit that built
+  the data here with the same name; see
   [step 9 of the build guide](docs/BUILDING.md#9-publish-the-app-data). This
   repository has no version numbers or release branches: the `map-*` and
   `peaks-regions-osm-*` tags and the dated changelog take their place.
