@@ -18,6 +18,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 with the merge date in place of a version number and the links to pull
 requests at the end of each date.
 
+## 2026-11-22
+
+### Fixed
+
+- **Park Outlines**: The Android and iOS apps no longer log "Invalid geometry in line layer" when they show the map: the park outline layer was also given the parks' label points, which cannot be drawn as lines. The map looks the same. Only the style changed; the tiles do not need rebuilding, and no app update is needed.
+
 ## 2026-11-17
 
 ### Changed
