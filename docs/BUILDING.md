@@ -266,6 +266,8 @@ Writes `build/static/`:
 at commit `40a0d19` (BSD licence, Maki icons CC0, Roboto Apache 2.0) with:
 
 - MapTiler and Natural Earth sources removed;
+- `park_outline` limited to polygons, as the `park` source layer also holds
+  label points, which a line layer cannot draw;
 - `hillshade` above land cover and below water;
 - `contour_minor` and `contour_major` lines, and `contour_label_100` /
   `contour_label_50` height labels;
