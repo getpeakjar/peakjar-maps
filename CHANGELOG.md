@@ -22,7 +22,9 @@ requests at the end of each date.
 
 ### Fixed
 
-- **Park Outlines**: The Android and iOS apps no longer log "Invalid geometry in line layer" when they show the map: the park outline layer was also given the parks' label points, which cannot be drawn as lines. The map looks the same. Only the style changed; the tiles do not need rebuilding, and no app update is needed.
+- **Park Outlines**: The Android and iOS apps no longer log "Invalid geometry in line layer" when they show the map: the park outline layer was also given the parks' label points, which cannot be drawn as lines. The map looks the same. Only the style changed; the tiles do not need rebuilding, and no app update is needed. [#8]
+
+[#8]: https://github.com/getpeakjar/peakjar-maps/pull/8
 
 ## 2026-11-17
 
