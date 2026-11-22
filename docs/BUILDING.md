@@ -421,17 +421,21 @@ download from them.
 
 ## Adding a country
 
-Coverage is set in one file. To add, for example, Austria:
+Coverage is set in one file. To add, for example, Croatia:
 
 1. In `scripts/config.sh`, add its Geofabrik path (the URL path under
-   `https://download.geofabrik.de/` without `-latest.osm.pbf`):
+   `https://download.geofabrik.de/` without `-latest.osm.pbf`) to the end of
+   `COUNTRIES`, keeping the countries already there:
 
    ```bash
-   COUNTRIES=(europe/poland europe/czech-republic europe/slovakia europe/austria)
+   COUNTRIES=(
+     # ... the countries already listed
+     europe/croatia
+   )
    ```
 
-   and its ISO code to `COUNTRY_CODES` in the same file (`[austria]=AT`), which
-   finds its boundary relation.
+   and its ISO code to `COUNTRY_CODES` in the same file (`[croatia]=HR`, keyed
+   by the last part of the path), which finds its boundary relation.
 
 2. Check resources. Planetiler needs RAM of at least half the merged input:
    raise `JAVA_HEAP` and `CONTAINER_MEMORY` if the merged file grows past
@@ -442,6 +446,7 @@ Coverage is set in one file. To add, for example, Austria:
    ```bash
    scripts/download.sh
    scripts/download-dem.sh
+   scripts/build-borders.sh
    scripts/build-basemap.sh
    scripts/build-world.sh
    scripts/build-trails.sh
@@ -450,6 +455,10 @@ Coverage is set in one file. To add, for example, Austria:
    scripts/build-terrain.sh
    scripts/build-static.sh
    ```
+
+   or `scripts/build-all.sh`, which runs the same steps. Do not skip the
+   borders: the base map, the world mask and the peaks all read their output,
+   and with an old one they silently leave the new country out.
 
    Nothing is incremental: each output covers the whole area, so all of it is
    rebuilt. Existing elevation tiles are not downloaded again, and existing
@@ -468,12 +477,19 @@ Coverage is set in one file. To add, for example, Austria:
      A country west of Greenwich (for example Spain or the UK) needs the
      tile naming extended to `W` longitudes.
 
-5. Check the peak counts the peaks step prints, and add the country's ISO code
-   to `COUNTRY_CODES` in `scripts/peaks_regions.py` (peaks in a country it
-   does not know are dropped). Regions are only built for Poland and
-   Slovakia (`REGION_COUNTRIES`).
+5. Check that the new country is among the peak counts the peaks step prints.
+   `scripts/peaks_regions.py` has no country list for peaks: it takes the
+   countries from `data/country_outlines.geojson`, which the borders step
+   writes, and drops peaks outside them. Regions are only built for Poland and
+   Slovakia (`REGION_COUNTRIES` there).
 
-Removing a country works the same way: delete it from the list and rebuild.
+6. In the app repository, add the country's name under `countries` in
+   `client/locales/en.json` and `client/locales/pl.json`. Without it the app
+   shows the ISO code as the region of that country's peaks.
+
+Removing a country works the same way: delete it from both lists in
+`scripts/config.sh`, rerun every step, and delete the elevation tiles it no
+longer needs ([step 3](#3-download-elevation-data)).
 
 ## Refreshing the data
 
