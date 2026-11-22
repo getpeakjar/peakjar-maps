@@ -218,6 +218,8 @@ writes `build/data/`:
   `wikipedia` and `country`, outlines simplified to about 30 m. Other
   countries have too few of these in OSM to be useful.
 - `snapshot.txt`: the OSM snapshot both come from.
+- `built-from.txt`: the commit that built them and their checksums, which
+  `publish-data.sh` checks. It is not published.
 
 GDAL's default OSM configuration drops the `ele` tag, so the script reads
 the data with a copy that keeps it. The step prints peak counts per country.
@@ -383,8 +385,10 @@ gets a suffix: `peaks-regions-osm-YYYY-MM-DD-2`. Releases are public and are
 never replaced or deleted, because older checkouts of the app still download
 from them.
 
-1. Merge the changes behind the data into `main`, then check out and pull
-   `main`.
+1. Merge the changes behind the data into `main`, check out and pull `main`,
+   and rebuild the data there with `scripts/build-all.sh --only peaks` (about
+   5 minutes). Data built on a branch cannot be published: squash merging
+   leaves that commit off `main`.
 
 2. Publish:
 
@@ -392,8 +396,10 @@ from them.
    scripts/publish-data.sh                 # or: scripts/publish-data.sh peaks-regions-osm-YYYY-MM-DD-2
    ```
 
-   It refuses to run unless the checkout is a clean `origin/main`, and refuses
-   a release name that already exists. It writes `SHA256SUMS`, writes the
+   It refuses to run unless the checkout is a clean `origin/main`, refuses a
+   release name that already exists, and refuses data unless
+   `build/data/built-from.txt`, which the peaks step writes, shows unchanged
+   files built without uncommitted changes from a commit on `main`. It writes `SHA256SUMS`, writes the
    release notes (counts, the commit that built the data, and the licence and
    credit texts), shows them and asks before publishing. After publishing it
    tags the commit here with the release name and pushes the tag, so every
