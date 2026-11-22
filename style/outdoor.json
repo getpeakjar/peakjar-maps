@@ -59,6 +59,11 @@
       "type": "line",
       "source": "openmaptiles",
       "source-layer": "park",
+      "filter": [
+        "==",
+        "$type",
+        "Polygon"
+      ],
       "paint": {
         "line-dasharray": [
           1,
